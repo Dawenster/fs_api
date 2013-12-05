@@ -3,10 +3,11 @@ class FlightsController < ApplicationController
 
   def create
     respond_to do |format|
-      puts "*" * 100
-      puts "I got yo stuff!"
-      puts params
-      format.json { render :json => { "message" => "It's all good!" } }
+      if params[:password] == ENV['POST_PASSWORD']
+        format.json { render :json => { "message" => "It's all good!", "params" => params } }
+      else
+        format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
+      end
     end
   end
 end
