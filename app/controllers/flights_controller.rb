@@ -1,4 +1,6 @@
 class FlightsController < ApplicationController
+  skip_before_filter :verify_authenticity_token
+
   def create
     respond_to do |format|
       puts "*" * 100
