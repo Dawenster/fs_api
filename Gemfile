@@ -9,6 +9,7 @@ gem 'rename'
 gem 'sass-rails', '~> 4.0.0'
 gem 'turbolinks'
 gem 'uglifier', '>= 1.3.0'
+gem 'will_paginate'
 
 group :development do
   gem 'pry'
