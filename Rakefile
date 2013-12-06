@@ -3,4 +3,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-FsYvrApi::Application.load_tasks
+FsYyzApi::Application.load_tasks
