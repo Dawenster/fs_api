@@ -5,27 +5,29 @@ class FlightsController < ApplicationController
     respond_to do |format|
       if params[:password] == ENV['POST_PASSWORD']
         flights = params[:flights]
-        flights.each do |flight|
+        flights.each do |k, flight|
           Flight.create(
-            :departure_airport_id => flight["departure_airport_id"],
-            :arrival_airport_id => flight["arrival_airport_id"],
-            :departure_time => flight["departure_time"],
-            :arrival_time => flight["arrival_time"],
+            :departure_airport_id => flight["departure_airport_id"].to_i,
+            :arrival_airport_id => flight["arrival_airport_id"].to_i,
+            :departure_time => to_date(flight["departure_time"]),
+            :arrival_time => to_date(flight["arrival_time"]),
             :airline => flight["airline"],
             :flight_no => flight["flight_no"],
-            :price => flight["price"],
-            :number_of_stops => flight["number_of_stops"],
-            :is_first_flight => flight["is_first_flight"],
-            :second_flight_destination => flight["second_flight_destination"],
-            :second_flight_no => flight["second_flight_no"],
-            :original_price => flight["original_price"],
+            :price => flight["price"].to_i,
+            :number_of_stops => flight["number_of_stops"].to_i,
+            :is_first_flight => to_bool(flight["is_first_flight"]),
+            :second_flight_destination => flight["second_flight_destination"].to_i,
+            :second_flight_no => flight["second_flight_no"].to_i,
+            :original_price => flight["original_price"].to_i,
             :origin_code => flight["origin_code"],
-            :shortcut => flight["shortcut"],
+            :shortcut => to_bool(flight["shortcut"]),
             :pure_date => flight["pure_date"],
-            :cheapest_price => flight["cheapest_price"],
-            :epic => flight["epic"],
+            :cheapest_price => flight["cheapest_price"].to_i,
+            :epic => to_bool(flight["epic"]),
             :month => flight["month"],
-            :new => flight["new"]
+            :new => to_bool(flight["new"]),
+            :created_at => to_date(flight["created_at"]),
+            :updated_at => to_date(flight["updated_at"])
           )
         end
         format.json { render :json => { "message" => "It's all good!", "params" => params } }
@@ -33,5 +35,15 @@ class FlightsController < ApplicationController
         format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
       end
     end
+  end
+
+  private
+
+  def to_bool(str)
+    str == "true"
+  end
+
+  def to_date(str)
+    DateTime.strptime(str, "%Y-%m-%d %H:%M:%S %z")
   end
 end
