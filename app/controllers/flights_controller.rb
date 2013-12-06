@@ -4,7 +4,11 @@ class FlightsController < ApplicationController
   def create
     respond_to do |format|
       if params[:password] == ENV['POST_PASSWORD']
+        Flight.all.each { |flight| flight.update_attributes(:new => false) }
+        Flight.where(:pure_date => params[:date]).destroy_all
+
         flights = params[:flights]
+
         flights.each do |k, flight|
           Flight.create(
             :departure_airport_id => flight["departure_airport_id"].to_i,
@@ -30,7 +34,10 @@ class FlightsController < ApplicationController
             :updated_at => to_date(flight["updated_at"])
           )
         end
-        format.json { render :json => { "message" => "It's all good!", "params" => params } }
+
+        Flight.where(:new => false).destroy_all
+
+        format.json { render :json => { "message" => "It's all good!" } }
       else
         format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
       end
