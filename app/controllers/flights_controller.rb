@@ -17,75 +17,64 @@ class FlightsController < ApplicationController
     end
   end
 
-  # def filter
-  #   params[:sort] == "Price" ? sort = "price ASC" : sort = "departure_time ASC"
+  def filter
+    if params[:password] == ENV['POST_PASSWORD']
+      passed_params = params[:passed_params]
 
-  #   if params[:segment] == "Going"
-  #     if params[:from] == "Any"
-  #       from_where = "departure_airport_id > ?"
-  #       from = 0
-  #     else
-  #       from_where = "departure_airport_id = ?"
-  #       from = Airport.find_by_name(params[:from]).id
-  #     end
+      passed_params[:sort] == "Price" ? sort = "price ASC" : sort = "departure_time ASC"
 
-  #     if params[:to] == "Any"
-  #       to_where = "arrival_airport_id > ?"
-  #       to = 0
-  #     else
-  #       to_where = "arrival_airport_id = ?"
-  #       to = Airport.find_by_name(params[:to]).id
-  #     end
-  #   else
-  #     @returning = true
+      if passed_params[:segment] == "Going"
+        from_where = "departure_airport_id = ?"
+        from = Airport.find_by_name(passed_params[:from]).id
 
-  #     if params[:to] == "Any"
-  #       to_where = "departure_airport_id > ?"
-  #       to = 0
-  #     else
-  #       to_where = "departure_airport_id = ?"
-  #       to = Airport.find_by_name(params[:to]).id
-  #     end
+        to_where = "arrival_airport_id > ?"
+        to = passed_params[:to] == "Any" ? 0 : Airport.find_by_name(passed_params[:to]).id
+      else
+        @returning = true
 
-  #     if params[:from] == "Any"
-  #       from_where = "arrival_airport_id > ?"
-  #       from = 0
-  #     else
-  #       from_where = "arrival_airport_id = ?"
-  #       from = Airport.find_by_name(params[:from]).id
-  #     end
-  #   end
+        if passed_params[:to] == "Any"
+          to_where = "departure_airport_id > ?"
+          to = 0
+        else
+          to_where = "departure_airport_id = ?"
+          to = Airport.find_by_name(passed_params[:to]).id
+        end
 
-  #   if params[:dates] == ""
-  #     start_date = Time.now - 1.year
-  #     end_date = Time.now + 1.year
-  #   else
-  #     dates = params[:dates].split(" - ") 
-  #     start_date = DateTime.strptime(dates[0], "%B %d, %Y")
-  #     end_date = DateTime.strptime(dates[1], "%B %d, %Y") + 1.day
-  #   end
+        if passed_params[:from] == "Any"
+          from_where = "arrival_airport_id > ?"
+          from = 0
+        else
+          from_where = "arrival_airport_id = ?"
+          from = Airport.find_by_name(passed_params[:from]).id
+        end
+      end
 
-  #   if params[:type] == "Epic"
-  #     @flights = Flight.where("shortcut = ? AND cheapest_price > ? AND #{from_where} AND #{to_where} AND departure_time >= ? AND arrival_time <= ? AND epic = ?", true, 0, from, to, start_date, end_date, true).order(sort).paginate(:page => params[:page], :per_page => 10)
-  #   else
-  #     @flights = Flight.where("shortcut = ? AND cheapest_price > ? AND #{from_where} AND #{to_where} AND departure_time >= ? AND arrival_time <= ?", true, 0, from, to, start_date, end_date).order(sort).paginate(:page => params[:page], :per_page => 10)
-  #   end
+      if passed_params[:dates] == ""
+        start_date = Time.now - 1.year
+        end_date = Time.now + 1.year
+      else
+        dates = passed_params[:dates].split(" - ") 
+        start_date = DateTime.strptime(dates[0], "%B %d, %Y")
+        end_date = DateTime.strptime(dates[1], "%B %d, %Y") + 1.day
+      end
 
-  #   @user = User.new
+      if passed_params[:type] == "Epic"
+        flights = Flight.where("shortcut = ? AND cheapest_price > ? AND #{from_where} AND #{to_where} AND departure_time >= ? AND arrival_time <= ? AND epic = ?", true, 0, from, to, start_date, end_date, true).order(sort).paginate(:page => passed_params[:page], :per_page => 10)
+        all_flights = Flight.where("shortcut = ? AND cheapest_price > ? AND #{from_where} AND #{to_where} AND departure_time >= ? AND arrival_time <= ? AND epic = ?", true, 0, from, to, start_date, end_date, true)
+      else
+        flights = Flight.where("shortcut = ? AND cheapest_price > ? AND #{from_where} AND #{to_where} AND departure_time >= ? AND arrival_time <= ?", true, 0, from, to, start_date, end_date).order(sort).paginate(:page => passed_params[:page], :per_page => 10)
+        all_flights = Flight.where("shortcut = ? AND cheapest_price > ? AND #{from_where} AND #{to_where} AND departure_time >= ? AND arrival_time <= ?", true, 0, from, to, start_date, end_date)
+      end
 
-  #   @empty_search = false
-  #   @empty_search = true if @flights.empty? && !params[:scroll]
-    
-  #   respond_to do |format|
-  #     if @flights.any?
-  #       format.json { render :json => { :flights => render_to_string('_flights.html.erb') } }
-  #     elsif @empty_search
-  #       format.json { render :json => { :flights => render_to_string('_flights.html.erb'), :noMoreFlights => true } }
-  #     else
-  #       format.json { render :json => { :flights => "<div class='no-more-flights label label-info'>No more flights to show</div>", :noMoreFlights => true } }
-  #     end
-  #   end
-  # end
+      destinations = all_flights.map{ |f| f.arrival_airport_id }.uniq
+      
+      respond_to do |format|
+        format.json { render :json => { :flights => flights, :destinations => destinations } }
+      end
+    else
+      format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
+    end
+  end
 
   def create
     respond_to do |format|
