@@ -1,3 +1,4 @@
+require 'csv'
 require 'will_paginate/array'
 
 class FlightsController < ApplicationController
@@ -91,6 +92,44 @@ class FlightsController < ApplicationController
 
         Flight.where("created_at < ?", Time.now - 1.day).destroy_all
 
+        format.json { render :json => { "message" => "It's all good!" } }
+      else
+        format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
+      end
+    end
+  end
+
+  def routes_to_scrape
+    respond_to do |format|
+      if params[:password] == ENV['POST_PASSWORD']
+        routes = []
+        Dir[Rails.root.join("db/routes/#{params[:code]}/*.csv")].each do |file|
+          CSV.foreach(file) do |route|
+            routes << [route[0], route[1]]
+          end
+        end
+        format.json { render :json => { "routes" => routes.uniq } }
+      else
+        format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
+      end
+    end
+  end
+
+  def mark_flights_as_old
+    respond_to do |format|
+      if params[:password] == ENV['POST_PASSWORD']
+        Flight.all.each { |flight| flight.update_attributes(:new => false) }
+        format.json { render :json => { "message" => "It's all good!" } }
+      else
+        format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
+      end
+    end
+  end
+
+  def delete_old_flights
+    respond_to do |format|
+      if params[:password] == ENV['POST_PASSWORD']
+        Flight.where(:new => false).destroy_all
         format.json { render :json => { "message" => "It's all good!" } }
       else
         format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
