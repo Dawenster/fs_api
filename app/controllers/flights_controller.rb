@@ -24,15 +24,9 @@ class FlightsController < ApplicationController
       passed_params["sort"] == "Price" ? sort = "price ASC" : sort = "departure_time ASC"
 
       if passed_params["segment"] == "Going"
-        # from = passed_params["from"]
-        # from_where = from == 0 ? "departure_airport_id > ?" : "departure_airport_id = ?"
-
         to = passed_params["to"]
         to_where = to == 0 ? "arrival_airport_id > ?" : "arrival_airport_id = ?"
       else
-        # from = passed_params["to"]
-        # from_where = to == 0 ? "departure_airport_id > ?" : "departure_airport_id = ?"
-
         to = passed_params["from"]
         to_where = from == 0 ? "arrival_airport_id > ?" : "arrival_airport_id = ?"
       end
