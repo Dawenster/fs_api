@@ -24,7 +24,8 @@ class FlightsController < ApplicationController
 
       passed_params["sort"] == "Price" ? sort = "price ASC" : sort = "departure_time ASC"
 
-      to_where = passed_params["to"] == 0 ? "arrival_airport_id > ?" : "arrival_airport_id = ?"
+      to = passed_params["to"]
+      to_where = to == 0 ? "arrival_airport_id > ?" : "arrival_airport_id = ?"
 
       if passed_params["dates"] == ""
         start_date = Time.now - 1.hour
