@@ -28,7 +28,7 @@ class FlightsController < ApplicationController
         to = passed_params["to"]
         to_where = to == 0 ? "arrival_airport_id > ?" : "arrival_airport_id = ?"
       else
-        to = passed_params["from"]
+        from = passed_params["from"]
         to_where = from == 0 ? "arrival_airport_id > ?" : "arrival_airport_id = ?"
       end
 
