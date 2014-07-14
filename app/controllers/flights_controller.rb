@@ -97,7 +97,8 @@ class FlightsController < ApplicationController
   def mark_flights_as_old
     respond_to do |format|
       if params[:password] == ENV['POST_PASSWORD']
-        Flight.all.each { |flight| flight.update_attributes(:new => false) }
+        # Flight.all.each { |flight| flight.update_attributes(:new => false) }
+        Flight.update_all(:new => false)
         format.json { render :json => { "message" => "It's all good!" } }
       else
         format.json { render :json => { "message" => "Whatcha tryin' to pull?" } }
